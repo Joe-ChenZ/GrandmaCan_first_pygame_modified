@@ -18,6 +18,7 @@ pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("第一個遊戲")
+
 clock = pygame.time.Clock()
 
 # 載入圖片
@@ -108,7 +109,13 @@ def draw_init():
                 waiting = False
                 return False
 
-class Player(pygame.sprite.Sprite):
+def draw_summary(score):
+    screen.blit(background_img, (0, 0))
+    draw_text(screen, 'Good job warrior..', 24, WIDTH/2, HEIGHT/2-48)
+    draw_text(screen, f'your score is {score}', 24, WIDTH/2, HEIGHT/2)
+    draw_text(screen, "Press any key to restart", 18, WIDTH/2, HEIGHT*3/4)
+    pygame.display.update()
+class Player(pygame.sprite.Sprite): 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(player_img, (50, 38))
@@ -267,6 +274,7 @@ pygame.mixer.music.play(-1)
 # 遊戲迴圈
 show_init = True
 running = True
+show_summary = False
 while running:
     if show_init:
         close = draw_init()
@@ -283,6 +291,22 @@ while running:
             new_rock()
         score = 0
     
+    # summary page
+    if show_summary:
+        show_summary = False
+        draw_summary(score)
+        score = 0
+        wait = True
+        while wait:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    wait = False
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_k:
+                        show_init = True
+                        wait = False
+        continue
     clock.tick(FPS)
     # 取得輸入
     for event in pygame.event.get():
@@ -335,7 +359,8 @@ while running:
             gun_sound.play()
 
     if player.lives == 0 and not(death_expl.alive()):
-        show_init = True
+        show_summary = True
+        # show_init = True
 
     # 畫面顯示
     screen.fill(BLACK)
